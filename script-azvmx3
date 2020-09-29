@@ -1,0 +1,38 @@
+ 
+param([string]$rg)
+
+
+$cred = get-credential -message "Nom et mot de passe de l'admin"
+
+For ($i=1; $i -le 3; $i++)
+
+{
+$vmname = "vm" + $i
+
+Write-host "Création de la vm:" $vmname
+new-azvm -resourcegroupname $rg -name $vmname -credential $cred -image UbuntuLTS
+
+
+
+
+
+$net=get-azvirtualnetwork -name net -resourcegroupname rg
+for ($i=1; $i -le 3; $i++)
+ { 
+   $User = "moi"
+   $PWord = ConvertTo-SecureString -String "Azertyuiop123" -AsPlainText -Force
+   $Cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $User, $PWord
+   $intname="int"+$i
+   $ip="10.0.2.10"+$i
+   $vmname = "vm" + $i
+   
+   
+
+   New-AzNetworkInterface -Name $intname -PrivateIpAddress $ip -Location 'France Central' -ResourceGroupName rg -Subnet $net.Subnets[2]}
+   $int=get-aznetworkInterface -name $intname -resourcegroupname rg
+
+   $vm=New-AzVMConfig -Name $i -VMSize standard_B1s | Set-AzVMOperatingSystem -ComputerName $vmname -linux -Credential $cred | Set-AzVMSourceImage -PublisherName canonical -Offer ubuntuserver -Skus 18.04-LTS -Version latest | Add-AzVMNetworkInterface -Id $int.id   
+
+   new-azvm -vm $vm -resourcegroupname rg -location francecentral
+    
+   } 
